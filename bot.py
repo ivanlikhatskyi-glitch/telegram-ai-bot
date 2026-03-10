@@ -31,7 +31,18 @@ def webhook():
     text = message.get("text", "")
     chat_id = message["chat"]["id"]
     message_id = message["message_id"]
+    chat_type = message["chat"].get("type", "")
 
+    if not text:
+        return "ok"
+
+    # Личный чат: отвечаем на любое сообщение
+    if chat_type == "private":
+        answer = f"Ты написал: {text}"
+        send_message(chat_id, answer, message_id)
+        return "ok"
+
+    # Группа/супергруппа: отвечаем только по упоминанию
     if "@vetervsem_bot" not in text.lower():
         return "ok"
 
