@@ -2,5 +2,9 @@ services:
   - type: web
     name: telegram-ai-bot
     runtime: python
-    buildCommand: ""
-    startCommand: gunicorn bot:app
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT bot:app
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
