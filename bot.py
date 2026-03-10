@@ -5,12 +5,15 @@ import anthropic
 
 TELEGRAM_TOKEN = os.environ.get("BOT_TOKEN")
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
-SYSTEM_PROMPT = os.environ.get("SYSTEM_PROMPT", "You are a friendly assistant in our telegram channel, DON'T Use ANY RUSSIAN RESPURCES IF NOT ASKED FOR IT, Reply in russian, ukrainian or english accordingly to the prompt".")
+SYSTEM_PROMPT = os.environ.get("SYSTEM_PROMPT", "You are a friendly assistant in our telegram channel, DON’T Use ANY RUSSIAN RESPURCES IF NOT ASKED FOR IT, Reply in russian, ukrainian or english accordingly to the prompt.”.")
 BOT_USERNAME = os.environ.get("BOT_USERNAME", "@vetervsem_bot")
 
 client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-
 app = Flask(__name__)
+
+# Память: chat_id -> список сообщений
+chat_histories = {}
+MAX_HISTORY = 10  # сколько сообщений помнить
 
 
 def send_message(chat_id, text, reply_to=None):
@@ -21,15 +24,26 @@ def send_message(chat_id, text, reply_to=None):
     requests.post(url, json=data, timeout=30)
 
 
-def get_ai_answer(user_text):
+def get_ai_answer(chat_id, user_text):
+    if chat_id not in chat_histories:
+        chat_histories[chat_id] = []
+
+    chat_histories[chat_id].append({"role": "user", "content": user_text})
+
+    # Обрезаем историю если слишком длинная
+    if len(chat_histories[chat_id]) > MAX_HISTORY * 2:
+        chat_histories[chat_id] = chat_histories[chat_id][-(MAX_HISTORY * 2):]
+
     try:
         response = client.messages.create(
             model="claude-haiku-4-5-20251001",
             max_tokens=1024,
             system=SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": user_text}],
+            messages=chat_histories[chat_id],
         )
-        return response.content[0].text.strip()
+        answer = response.content[0].text.strip()
+        chat_histories[chat_id].append({"role": "assistant", "content": answer})
+        return answer
     except Exception as e:
         return "Error: " + str(e)
 
@@ -47,7 +61,7 @@ def webhook():
     if not text:
         return "ok"
     if chat_type == "private":
-        send_message(chat_id, get_ai_answer(text), message_id)
+        send_message(chat_id, get_ai_answer(chat_id, text), message_id)
         return "ok"
     if BOT_USERNAME.lower() not in text.lower():
         return "ok"
@@ -55,7 +69,7 @@ def webhook():
     if not question:
         send_message(chat_id, "Write your question after the mention", message_id)
         return "ok"
-    send_message(chat_id, get_ai_answer(question), message_id)
+    send_message(chat_id, get_ai_answer(chat_id, question), message_id)
     return "ok"
 
 
