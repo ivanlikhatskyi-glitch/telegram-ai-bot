@@ -5,7 +5,7 @@ import anthropic
 
 TELEGRAM_TOKEN = os.environ.get("BOT_TOKEN")
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
-SYSTEM_PROMPT = os.environ.get("SYSTEM_PROMPT", "You are a helpful assistant. Reply in Russian, briefly and to the point.")
+SYSTEM_PROMPT = os.environ.get("SYSTEM_PROMPT", "You are a friendly assistant in our telegram channel, DON'T Use ANY RUSSIAN RESPURCES IF NOT ASKED FOR IT, Reply in russian, ukrainian or english accordingly to the prompt".")
 BOT_USERNAME = os.environ.get("BOT_USERNAME", "@vetervsem_bot")
 
 client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
