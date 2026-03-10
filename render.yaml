@@ -7,4 +7,4 @@ services:
     startCommand: gunicorn bot:app
     envVars:
       - key: BOT_TOKEN
-        sync: false
+        value: 8202274177:AAGio1PLsFxqORn4y4kkwFgjV7k0G0To2Yg
