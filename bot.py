@@ -32,10 +32,10 @@ def webhook():
     chat_id = message["chat"]["id"]
     message_id = message["message_id"]
 
-    if "@yourbotname" not in text.lower():
+    if "@vetervsem_bot" not in text.lower():
         return "ok"
 
-    question = text.replace("@yourbotname", "").strip()
+    question = text.replace("@vetervsem_bot", "").strip()
 
     if not question:
         send_message(chat_id, "Напиши вопрос после упоминания 🙂", message_id)
